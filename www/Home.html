@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Home</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<link rel="stylesheet" href="css/bootstrap.min.css">
+	<link rel="stylesheet" href="css/font-awesome.css">
+	<link rel="stylesheet" type="text/css" href="css/index.css">
+	<link href="//fonts.googleapis.com/css?family=Tangerine:400,700" rel="stylesheet">
+	<link href="//fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i,800,800i" rel="stylesheet">
+	<!-- //online-fonts -->
+		<script src="js/jquery.min.js"></script>
+	  <script src="js/bootstrap.min.js"></script>
+<script src="js/angular.min.js"></script>	
+
+	<script type="text/javascript">
+if(localStorage.getItem("Code") == null){
+	window.location.href = "login.html";
+}
+</script>
+<style type="text/css">
+	body{
+		 background:url(../images/back1.png);
+	}
+</style>
+
+</head>
+<body>
+		<div id="loading" class="loader">	
+	</div>
+<div ng-app="myApp" ng-controller="UserDetails">
+	<div class="btn-group btn-group-justified">
+			<a href="Home.html" class="btn btn-primary active"><i class="fa-home fa fa-3x"></i></a>
+		<a href="TrackComplain.html" class="btn btn-primary "><i class="fa-list fa fa-3x"></i></a>
+		<a href="#" class="btn btn-primary "><i class="fa-road fa fa-3x"></i></a>
+		<a href="" class="btn btn-primary"  ng-click="LogOut()"><i class="fa-power-off fa fa-3x"></i></a>
+		<a href="ChangePassword.html" class="btn btn-primary"><i class="fa-cog fa fa-3x"></i></a>
+
+	</div>
+
+	<div class=" text-center">
+		<div style="margin: 5px;">
+			
+				<div class="bs-component">
+					<div class="panel panel-primary">
+						<div class="panel-heading">
+							<h3 class="panel-title">Active Complain List</h3>
+							<br>
+							<p>{{ today | date : "fullDate"}}</p>
+						</div>
+						<div class="panel-body" style="background:url(images/maxresdefault.jpg);">
+							<div class="text-center">
+								<img src="img/logo.png"  width="70px">
+							</div>
+							<br><br>
+							<div style="overflow: scroll;">
+							<table class="table" style="font-weight: bold;" >
+								<tr>
+									<th>Complain No</th>
+									<th>Remark</th>
+									<th>Complain Type</th>
+									<th>Date</th>
+									<th>Consumer Name</th>
+									<th>Street No</th>
+									<th>Quarter No</th>
+									<th>Status</th>
+								</tr>
+								<tr ng-repeat="x in details" style="text-align: left;">
+									<td>{{ x.ComplainNo }}</td>
+
+									<td>
+										<a ng-click="clink( x.Vno,x.Status,x.ComplainNo)" >{{ x.ComplainRemark }}</a> </td>
+									<td>{{x.Name}}</td>
+									<td>{{x.CompDate}}</td>
+									<td>{{x.ConsumerName}}</td>
+									<td>{{x.StreetNo}}</td>
+									<td>{{x.QuarterNo}}</td>
+									<td><select disabled=""  ng-options="opt.id as opt.name for opt in statuslist" ng-selected="opt.id == x.Status" ng-model="statuslistdata">
+
+									</select>
+								<span style="visibility: hidden;">	{{statuslistdata = x.Status}}</span>
+								</td>
+								
+								</tr>
+							
+							</table>
+							</div>
+						</div>
+					</div>
+
+				</div>
+
+
+			
+		</div>
+	</div>
+<script>
+		var app = angular.module('myApp', []);
+		app.controller('UserDetails', function($scope, $http) {
+		 $scope.today = new Date();
+		  $scope.statuslist = [
+			{name:'Active', id:0},
+			{name:'Alloted', id:1},
+			{name:'Pending', id:2},
+			{name:'Close by Staff', id:3},
+			{name:'Close by Supervisor', id:4},
+			{name:'Close by Consumer', id:5},
+			{name:'Completed', id:6}
+		  ]
+			 
+
+			var q = "select Vno,ComplainNo,ComplainRemark,tblComplainEntry.Status,tblComplain.Name,CompDate,tblStaffMaster.Name as ConsumerName,tblQuarter.QuarterNo,tblQuarter.StreetNo from tblComplainEntry  inner join tblComplain on tblComplain.Code = tblComplainEntry.Compid inner join tblStaffMaster on tblComplainEntry.ConsumerId = tblStaffMaster.Code inner join tblQuarter on tblQuarter.Code = tblComplainEntry.Quarterid where tblComplainEntry.Status in (1,2) and tblComplainEntry.Staffid ="+localStorage.getItem("Code");
+
+			$http.get(localStorage.getItem("serverpath")+"staffdata.php?Code=execute&q="+q)
+			.then(function (response) {$scope.details = response.data.result; });
+
+			 $scope.LogOut = function () {
+				 localStorage.removeItem("Code");
+				 window.location.href= "login.html";
+   			 };
+
+   			 $scope.clink = function (Vno,Status,ComplainNo) {
+				sessionStorage.setItem("Vnofortrace",Vno);
+				sessionStorage.setItem("Statusfortrace",Status);
+				sessionStorage.setItem("ComplainNo",ComplainNo);
+				window.location.href= "ComplainDetail.html";
+   			 };
+		});
+	</script>
+
+<script type="text/javascript" src="js/sc_index.js"></script>
+
+</div>
+
+
+</body>
+</html>

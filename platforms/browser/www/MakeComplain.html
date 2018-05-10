@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Home</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<link rel="stylesheet" href="css/bootstrap.min.css">
+	<link rel="stylesheet" href="css/font-awesome.css">
+	<link rel="stylesheet" type="text/css" href="css/index.css">
+	<link href="//fonts.googleapis.com/css?family=Tangerine:400,700" rel="stylesheet">
+	<link href="//fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i,800,800i" rel="stylesheet">
+	<!-- //online-fonts -->
+	<script src="js/jquery.min.js"></script>
+	  <script src="js/bootstrap.min.js"></script>
+<script src="js/angular.min.js"></script>	
+
+	<script type="text/javascript">
+if(localStorage.getItem("Code") == null){
+	window.location.href = "login.html";
+}
+</script>
+<style type="text/css">
+	body{
+		 background:url(../images/back1.png);
+	}
+</style>
+
+</head>
+<body>
+		<div id="loading" class="loader">	
+	</div>
+<div ng-app="myApp" ng-controller="UserDetails">
+	<div class="btn-group btn-group-justified">
+		<a href="Home.html" class="btn btn-primary"><i class="fa-home fa fa-3x"></i></a>
+		<a href="#" class="btn btn-primary active"><i class="fa-plus fa fa-3x"></i></a>
+		<a href="TrackComplain.html" class="btn btn-primary"><i class="fa-road fa fa-3x"></i></a>
+		<a href="" class="btn btn-primary"  ng-click="LogOut()"><i class="fa-power-off fa fa-3x"></i></a>
+		<a href="ChangePassword.html" class="btn btn-primary"><i class="fa-cog fa fa-3x"></i></a>
+
+	</div>
+
+	<div class=" text-center">
+		<div style="margin: 5px;">
+			
+				<div class="bs-component">
+					<div class="panel panel-primary" style="background:url(images/maxresdefault.jpg);">
+						<div class="panel-heading">
+							<h3 class="panel-title">Add Complain</h3>
+							<br>
+							<p>{{ today | date : "fullDate"}}</p>
+						</div>
+						<div class="panel-body">
+							<div class="text-center">
+								<img src="img/logo.png"  width="70px">
+							</div>
+							<br><br>
+				
+			<h4 class="alert-success alert" ng-repeat="a in alert">{{a.Msg}}</h4>
+ 		<select class="form-control" ng-init="ctypeselect" ng-model="ctypeselect" ng-change="Update()">
+ 			<option value="" selected="" disabled="">Select Complain Type</option>
+      <option ng-repeat="x in ctypes" value="{{x.Code}}">{{x.Name}}</option>
+    </select>
+
+
+    <div class="container">
+			<div style="text-align: left; margin-left: 10px; " >
+    	<div class="radio alert alert-info" ng-repeat="x in complains">
+  		<label class=""><input type="radio" ng-model="rbComp" ng-change='rbChange(rbComp)' name="optradio" value="{{ x.Code }}">{{ x.Name }}</label>
+		</div>
+			</div>
+
+
+		
+		<div id="box" style="visibility: hidden;">
+			<textarea ng-model="CompRemark" class="form-control" placeholder="Enter Your Complain Details Here..."></textarea>
+			<br><br>
+			<button class="btn btn-primary" ng-click="Submit()">Submit</button>
+		</div>
+	</div>
+
+
+
+
+						</div>
+					</div>
+
+				</div>
+
+
+			
+		</div>
+	</div>
+
+<script>
+		var app = angular.module('myApp', []);
+		app.controller('UserDetails', function($scope, $http) {
+		 $scope.today = new Date();
+		var q = "select Code,Name from tblComplainType where IsDeactive =0 and IsDelete =0";
+			$http.get(localStorage.getItem("serverpath")+"staffdata.php?Code=execute&q="+q)
+			.then(function (response) {$scope.ctypes = response.data.result; });
+
+
+			 $scope.LogOut = function () {
+				 localStorage.removeItem("Code");
+				 window.location.href= "login.html";
+   			 };
+
+   			$scope.Update = function() {
+      		 // alert($scope.ctypeselect);
+      		
+      		  q = "select Code,Name from tblComplain where CompTypeId = "+$scope.ctypeselect+" and IsDeactive =0 and IsDelete = 0"
+      		  $http.get(localStorage.getItem("serverpath")+"staffdata.php?Code=execute&q="+q)
+			.then(function (response) {$scope.complains = response.data.result; });
+    		};
+
+  			$scope.rbChange = function(value) {
+  			 $("#box").css("visibility","visible");
+     			sessionStorage.setItem("rbComp",value);
+			};
+
+			$scope.Submit = function(){
+				q = "exec sp_ComplainEntry "+localStorage.getItem("Code")+","+sessionStorage.getItem("rbComp")+", '"+$scope.CompRemark+"' ,0,'Complain is now active',0,'Consumer','I'";
+				//alert(q);
+			 $http.get(localStorage.getItem("serverpath")+"staffdata.php?Code=addComplain&q="+q)
+			 .then(function (response) {
+			 	$scope.alert = response.data.result; 
+			 	 window.setTimeout(function(){
+      			  window.location.href= "TrackComplain.html";
+   				 }, 2000);
+			 	
+			 });
+				
+			}
+		});
+	</script>
+
+<script type="text/javascript" src="js/sc_index.js"></script>
+</div>
+</body>
+</html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Home</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<link rel="stylesheet" href="css/bootstrap.min.css">
+	<link rel="stylesheet" href="css/font-awesome.css">
+	<link rel="stylesheet" type="text/css" href="css/index.css">
+	<link href="//fonts.googleapis.com/css?family=Tangerine:400,700" rel="stylesheet">
+	<link href="//fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i,800,800i" rel="stylesheet">
+	<!-- //online-fonts -->
+	
+
+	<script src="js/jquery.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="js/angular.min.js"></script>	
+	<script type="text/javascript">
+		if(localStorage.getItem("Code") == null){
+			window.location.href = "login.html";
+		}
+		
+
+	</script>
+	<style type="text/css">
+	body{
+		background:url(../images/back1.png);
+	}
+</style>
+
+</head>
+<body>
+	<div id="loading" class="loader">	
+	</div>
+	<div ng-app="myApp" ng-controller="UserDetails">
+		<div class="btn-group btn-group-justified">
+			<a href="Home.html" class="btn btn-primary"><i class="fa-home fa fa-3x"></i></a>
+			<a href="TrackComplain.html" class="btn btn-primary "><i class="fa-list fa fa-3x"></i></a>
+			<a href="#" class="btn btn-primary active"><i class="fa-road fa fa-3x"></i></a>
+			<a href="" class="btn btn-primary"  ng-click="LogOut()"><i class="fa-power-off fa fa-3x"></i></a>
+			<a href="ChangePassword.html" class="btn btn-primary"><i class="fa-cog fa fa-3x"></i></a>
+
+		</div>
+
+		
+		<div class="text-center">
+			<div style="margin: 5px;">
+				
+				<div class="bs-component">
+					<div class="panel panel-primary">
+						<div class="panel-heading">
+							<h3 class="panel-title">Complain Details</h3>
+							<br>
+							<p>{{ today | date : "fullDate"}}</p>
+						</div>
+						<div class="panel-body" style="background:url(images/maxresdefault.jpg);overflow: scroll;" >
+							<div class="text-center">
+								<img src="img/logo.png"  width="70px">
+							</div>
+							<br>
+							<h4 class="alert-success alert" ng-repeat="a in alert">{{a.Msg}}</h4>
+							<h4 class="alert-success alert" id="titlecno"></h4>
+							
+							<table class="table" style="font-weight: bold;" >
+								<tr>
+									<th>Remark</th>
+									<th>Status</th>
+									<th>Date</th>
+								</tr>
+								<tr ng-repeat="x in details" style="text-align: left;">
+									
+									<td>
+										<span>{{ x.StatusRemark }}</span> </td>
+										<td><select disabled=""  ng-options="opt.id as opt.name for opt in statuslist" ng-selected="opt.id == x.Status" ng-model="statuslistdata">
+
+										</select>
+										<span style="visibility: hidden;">	{{statuslistdata = x.Status}}</span>
+									</td>
+									<td>{{ x.Date }}</td>
+
+									
+								</tr>
+								<tr class="closerow">
+									<td colspan="3">
+										<textarea ng-model="CompRemark" class="form-control" placeholder="Enter Your Remark Here..."></textarea>
+									</td>
+								</tr>
+								<tr class="closerow">
+									<td colspan="3" >
+										<a data-toggle="modal" class="btn btn-danger" data-target="#myModal">
+											<i class="fa fa-close fa-2x " title="Close Complain">Close Complain</i>
+										</a>
+
+										<!-- Modal -->
+										<div class="modal fade" id="myModal" role="dialog">
+											<div class="modal-dialog modal-lg">
+												<div class="modal-content">
+													<div class="modal-header">
+														<button type="button" class="close" data-dismiss="modal">&times;</button>
+														<h4 class="modal-title">Confirmation !</h4>
+													</div>
+													<div class="modal-body">
+														<p>Do you Really want to close this Complain ?</p>
+													</div>
+													<div class="modal-footer">
+														<button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+														<button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="Submit()">Yes</button>
+													</div>
+												</div>
+											</div>
+										</div>
+									</td>
+
+								</tr>
+								
+							</table>
+						</div>
+					</div>
+
+				</div>
+
+			</div>
+		</div>
+
+		<script>
+			document.getElementById("titlecno").innerHTML = "Complain No : "+sessionStorage.getItem("ComplainNo");
+			var app = angular.module('myApp', []);
+			app.controller('UserDetails', function($scope, $http) {
+				$scope.today = new Date();
+				$scope.statuslist = [
+				{name:'Active', id:0},
+				{name:'Alloted', id:1},
+				{name:'Pending', id:2},
+				{name:'Close by Staff', id:3},
+				{name:'Close by Supervisor', id:4},
+				{name:'Close by Consumer', id:5}
+				]
+				if(sessionStorage.getItem("Statusfortrace") == '3' || sessionStorage.getItem("Statusfortrace") == '4' || sessionStorage.getItem("Statusfortrace") == '5' || sessionStorage.getItem("Statusfortrace") == '6')
+				{
+					$(".closerow").css("visibility","hidden");
+				}
+				var q = "select Vno,Status,StatusRemark,Date from tblComplainEntryDet where Vno = "+sessionStorage.getItem("Vnofortrace");
+				
+				$http.get(localStorage.getItem("serverpath")+"staffdata.php?Code=execute&q="+q)
+				.then(function (response) {$scope.details = response.data.result; });
+
+				$scope.LogOut = function () {
+					localStorage.removeItem("Code");
+					window.location.href= "login.html";
+				};
+				$scope.Submit = function(){
+					if($scope.CompRemark != ""){
+						q = "exec sp_ComplainUpdate "+sessionStorage.getItem("Vnofortrace")+","+0+",'"+$scope.CompRemark+"' ,3,'date','Staff','cbConsumer'";
+				//alert(q);
+				$http.get(localStorage.getItem("serverpath")+"staffdata.php?Code=addComplain&q="+q)
+				.then(function (response) {
+					$scope.alert = response.data.result; 
+					window.setTimeout(function(){
+						sessionStorage.setItem("Statusfortrace",3);
+						window.location.href= "ComplainDetail.html";
+					}, 2000);
+					
+				});
+			}
+		}
+	});
+</script>
+
+<script type="text/javascript" src="js/sc_index.js"></script>
+</div>
+
+</body>
+</html>
