@@ -6,7 +6,7 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<link rel="stylesheet" href="css/bootstrap.min.css">
 	<link rel="stylesheet" href="css/font-awesome.css">
-	<link rel="stylesheet" type="text/css" href="css/index.css">
+	<!-- <link rel="stylesheet" type="text/css" href="css/index.css"> -->
 	<link href="//fonts.googleapis.com/css?family=Tangerine:400,700" rel="stylesheet">
 	<link href="//fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i,800,800i" rel="stylesheet">
 	<!-- //online-fonts -->
@@ -19,12 +19,12 @@ if(localStorage.getItem("Code") == null){
 	window.location.href = "login.html";
 }
 </script>
+
 <style type="text/css">
 	body{
-		 background:url(../images/back1.png);
+		 background:url(../images/maxresdefault.jpg);
 	}
 </style>
-
 </head>
 <body>
 		<div id="loading" class="loader">	
@@ -32,8 +32,8 @@ if(localStorage.getItem("Code") == null){
 <div ng-app="myApp" ng-controller="UserDetails">
 	<div class="btn-group btn-group-justified">
 		<a href="Home.html" class="btn btn-primary"><i class="fa-home fa fa-3x"></i></a>
-		<a href="TrackComplain.html" class="btn btn-primary active"><i class="fa-list fa fa-3x"></i></a>
-		<a href="#" class="btn btn-primary "><i class="fa-road fa fa-3x"></i></a>
+		<a href="MakeComplain.html" class="btn btn-primary"><i class="fa-plus fa fa-3x"></i></a>
+		<a href="#" class="btn btn-primary active"><i class="fa-road fa fa-3x"></i></a>
 		<a href="" class="btn btn-primary"  ng-click="LogOut()"><i class="fa-power-off fa fa-3x"></i></a>
 		<a href="ChangePassword.html" class="btn btn-primary"><i class="fa-cog fa fa-3x"></i></a>
 
@@ -45,8 +45,7 @@ if(localStorage.getItem("Code") == null){
 				<div class="bs-component">
 					<div class="panel panel-primary">
 						<div class="panel-heading">
-							
-							<h3 class="panel-title">All Complain List</h3>
+							<h3 class="panel-title">Track Complain</h3>
 							<br>
 							<p>{{ today | date : "fullDate"}}</p>
 						</div>
@@ -55,14 +54,7 @@ if(localStorage.getItem("Code") == null){
 								<img src="img/logo.png"  width="70px">
 							</div>
 							<br>
-							<div class="row" style="margin-bottom:  10px;">
-						
-									<button class="btn-primary btn-block btn" ng-click="LoadClosed()">Closed Complains</button>
-							
-							
-									<button class="btn-primary btn-block btn" ng-click="LoadPending()">Pending Complains</button>
-							
-							</div>
+							<h4 class="alert-success alert">Complain List</h4>
 							<div style="overflow: scroll;">
 							<table class="table" style="font-weight: bold;" >
 								<tr>
@@ -70,9 +62,6 @@ if(localStorage.getItem("Code") == null){
 									<th>Remark</th>
 									<th>Complain Type</th>
 									<th>Date</th>
-									<th>Consumer Name</th>
-									<th>Street No</th>
-									<th>Quarter No</th>
 									<th>Status</th>
 								
 								</tr>
@@ -83,9 +72,6 @@ if(localStorage.getItem("Code") == null){
 										<a ng-click="clink( x.Vno,x.Status,x.ComplainNo)" >{{ x.ComplainRemark }}</a> </td>
 									<td>{{x.Name}}</td>
 									<td>{{x.CompDate}}</td>
-									<td>{{x.ConsumerName}}</td>
-									<td>{{x.StreetNo}}</td>
-									<td>{{x.QuarterNo}}</td>
 									<td><select disabled=""  ng-options="opt.id as opt.name for opt in statuslist" ng-selected="opt.id == x.Status" ng-model="statuslistdata">
 
 									</select>
@@ -116,29 +102,19 @@ if(localStorage.getItem("Code") == null){
 			{name:'Close by Supervisor', id:4},
 			{name:'Close by Consumer', id:5}
 		  ]
-			
+			 
+
+			var q = "select Vno,ComplainNo,ComplainRemark,Status,Name,CompDate from tblComplainEntry  inner join tblComplain on tblComplain.Code = tblComplainEntry.Compid where ConsumerId ="+localStorage.getItem("Code")+" and Quarterid = "+localStorage.getItem("quaterid");
+
+			$http.get(localStorage.getItem("serverpath")+"staffdata.php?Code=execute&q="+q)
+			.then(function (response) {$scope.details = response.data.result; });
 
 			 $scope.LogOut = function () {
 				 localStorage.removeItem("Code");
+				 localStorage.removeItem("IsVerified");
 				 window.location.href= "login.html";
    			 };
-   			  $scope.LoadClosed = function () {
-				 
-			var q = "select top 10 Vno,ComplainNo,ComplainRemark,tblComplainEntry.Status,tblComplain.Name,CompDate,tblStaffMaster.Name as ConsumerName,tblQuarter.QuarterNo,tblQuarter.StreetNo from tblComplainEntry  inner join tblComplain on tblComplain.Code = tblComplainEntry.Compid inner join tblStaffMaster on tblComplainEntry.ConsumerId = tblStaffMaster.Code inner join tblQuarter on tblQuarter.Code = tblComplainEntry.Quarterid where tblComplainEntry.Status in (3,4,5,6) and tblComplainEntry.staffid ="+localStorage.getItem("Code")+" order by Vno desc";
 
-			$http.get(localStorage.getItem("serverpath")+"staffdata.php?Code=execute&q="+q)
-			.then(function (response) {$scope.details = response.data.result; });
-
-   			 };
-   			  $scope.LoadPending = function () {
-				 
-
-			var q = "select top 10 Vno,ComplainNo,ComplainRemark,tblComplainEntry.Status,tblComplain.Name,CompDate,tblStaffMaster.Name as ConsumerName,tblQuarter.QuarterNo,tblQuarter.StreetNo from tblComplainEntry  inner join tblComplain on tblComplain.Code = tblComplainEntry.Compid inner join tblStaffMaster on tblComplainEntry.ConsumerId = tblStaffMaster.Code inner join tblQuarter on tblQuarter.Code = tblComplainEntry.Quarterid where tblComplainEntry.Status in (0,1,2) and tblComplainEntry.staffid ="+localStorage.getItem("Code")+" order by Vno desc";
-
-			$http.get(localStorage.getItem("serverpath")+"staffdata.php?Code=execute&q="+q)
-			.then(function (response) {$scope.details = response.data.result; });
-
-   			 };
    			 $scope.clink = function (Vno,Status,ComplainNo) {
 				sessionStorage.setItem("Vnofortrace",Vno);
 				sessionStorage.setItem("Statusfortrace",Status);
@@ -150,6 +126,5 @@ if(localStorage.getItem("Code") == null){
 
 <script type="text/javascript" src="js/sc_index.js"></script>
 </div>
-
 </body>
 </html>
