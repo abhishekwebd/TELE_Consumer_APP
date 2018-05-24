@@ -113,6 +113,7 @@ if(localStorage.getItem("Code") != null && localStorage.getItem("IsVerified") !=
     $scope.Login = function () {
 	
         http = localStorage.getItem("serverpath")+"staffdata.php?Code=logincheck&username="+$scope.username+"&password="+$scope.password;//the REST service Server to fetch the day stock 
+   
         $http.get(http)
             .then(function (response) {$scope.names = response.data.d; 
             	if(response.data.d[0].Code != 0)

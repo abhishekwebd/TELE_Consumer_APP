@@ -61,6 +61,10 @@ if(localStorage.getItem("Code") == null){
       <option ng-repeat="x in ctypes" value="{{x.Code}}">{{x.Name}}</option>
     </select>
 
+	<select class="form-control" id="subcompselect" style="visibility: hidden;" ng-init="subctypeselect" ng-model="subctypeselect" ng-change="subUpdate()">
+ 			<option value="" selected="" disabled="">Select Sub Complain Type</option>
+      <option ng-repeat="x in subctypes" value="{{x.Code}}">{{x.Name}}</option>
+    </select>
 
     <div class="container">
 			<div style="text-align: left; margin-left: 10px; " >
@@ -108,8 +112,16 @@ if(localStorage.getItem("Code") == null){
 
    			$scope.Update = function() {
       		 // alert($scope.ctypeselect);
+      		$("#subcompselect").css("visibility","visible");
+      		var q = "select Code,Name from tblSubComplainType where IsDeactive =0 and IsDelete =0 and CompTypeid = "+$scope.ctypeselect;
+			$http.get(localStorage.getItem("serverpath")+"staffdata.php?Code=execute&q="+q)
+			.then(function (response) {$scope.subctypes = response.data.result; });
+    		};
+
+			$scope.subUpdate = function() {
+      		 // alert($scope.ctypeselect);
       		
-      		  q = "select Code,Name from tblComplain where CompTypeId = "+$scope.ctypeselect+" and IsDeactive =0 and IsDelete = 0"
+      		  q = "select Code,Name from tblComplain where SubComplainTypeId = "+$scope.subctypeselect+" and IsDeactive =0 and IsDelete = 0"
       		  $http.get(localStorage.getItem("serverpath")+"staffdata.php?Code=execute&q="+q)
 			.then(function (response) {$scope.complains = response.data.result; });
     		};
